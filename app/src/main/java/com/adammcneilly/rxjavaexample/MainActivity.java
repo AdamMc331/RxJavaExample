@@ -4,6 +4,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -17,12 +21,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        createHelloWorldObservable();
-        createHelloWorldObservableSimpler();
-        createHelloWorldObservableChained();
-        createHelloWorldObservableWithMaps();
+        List<String> test = new ArrayList<>();
+        test.add("Adam");
+        test.add("TJ");
+        test.add("Fred");
+        test.add("Michael");
+        test.add("Ron");
+        test.add("Jacob");
+        createObservableWithTake(test);
     }
 
+    //region PART 1
     private void createHelloWorldObservable() {
         // Create observable
         Observable<String> observable = Observable.create(new Observable.OnSubscribe<String>() {
@@ -114,4 +123,95 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+    //endregion
+
+    //region PART 2
+    private void createHelloWorldObservableWithFlatMap(List<String> strings) {
+        Observable.just(strings)
+                .flatMap(new Func1<List<String>, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(List<String> strings) {
+                        return Observable.from(strings);
+                    }
+                }).subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                        Log.v(LOG_TAG, s);
+                    }
+                });
+    }
+
+    private void createFlatMapFromObservableToString(List<String> strings) {
+        Observable.just(strings)
+                .flatMap(new Func1<List<String>, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(List<String> strings) {
+                        return Observable.from(strings);
+                    }
+                })
+                .flatMap(new Func1<String, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(String s) {
+                        return Observable.just(s);
+                    }
+                })
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                        Log.v(LOG_TAG, s);
+                    }
+                });
+    }
+
+    private void createObservableWithFilter(List<String> strings) {
+        Observable.just(strings)
+                .flatMap(new Func1<List<String>, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(List<String> strings) {
+                        return Observable.from(strings);
+                    }
+                })
+                .flatMap(new Func1<String, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(String s) {
+                        return Observable.just(s);
+                    }
+                })
+                .filter(new Func1<String, Boolean>() {
+                    @Override
+                    public Boolean call(String s) {
+                        return (!s.equals("Adam"));
+                    }
+                })
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                        Log.v(LOG_TAG, s);
+                    }
+                });
+    }
+
+    private void createObservableWithTake(List<String> strings) {
+        Observable.just(strings)
+                .flatMap(new Func1<List<String>, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(List<String> strings) {
+                        return Observable.from(strings);
+                    }
+                })
+                .flatMap(new Func1<String, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(String s) {
+                        return Observable.just(s);
+                    }
+                })
+                .take(5)
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String s) {
+                        Log.v(LOG_TAG, s);
+                    }
+                });
+    }
+    //endregion
 }
